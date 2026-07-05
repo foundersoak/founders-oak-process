@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Founders' Oak — Deal Flow Operating System</title>
+<style>
+  :root{
+    --fo-green:#233A2C; --fo-green-light:#2E4D3A; --fo-green-dark:#1A2C21;
+    --fo-copper:#A26A3A; --fo-copper-hover:#B87D4D; --fo-copper-muted:rgba(162,106,58,0.15);
+    --fo-black:#1A1A1A; --fo-gray-dark:#374151; --fo-gray-medium:#6B6A64;
+    --fo-gray-light:#F8F9FA; --fo-gray-border:#E5E7EB; --fo-white:#FFFFFF;
+    --fo-strength-bg:#F0FFF4; --fo-strength-border:#38A169;
+    --fo-weakness-bg:#FFFBEB; --fo-weakness-border:#D97706;
+    --fo-critical:#DC2626; --fo-moderate:#F59E0B; --fo-positive:#10B981;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:Arial,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;
+    color:var(--fo-gray-dark);background:var(--fo-white);line-height:1.65;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,.brandname{font-family:Georgia,serif}
+  a{color:var(--fo-copper);text-decoration:none}
+  a:hover{color:var(--fo-copper-hover);text-decoration:underline}
+
+  /* ---------- HEADER ---------- */
+  header.hero{background:linear-gradient(to bottom,var(--fo-green-dark),var(--fo-green-light));
+    color:var(--fo-white);padding:46px 32px 30px;text-align:center}
+  .hero .brandname{font-size:1.35rem;letter-spacing:.5px}
+  .hero .rule{width:120px;height:3px;background:var(--fo-copper);margin:16px auto}
+  .hero h1{font-size:2.3rem;font-weight:700;line-height:1.2;margin-bottom:8px}
+  .hero .subtitle{color:var(--fo-copper-hover);font-size:1.1rem;font-weight:500}
+  .hero .meta{color:rgba(255,255,255,.7);font-size:.85rem;margin-top:14px}
+
+  /* ---------- TABS ---------- */
+  .tabbar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;justify-content:center;
+    gap:2px;background:var(--fo-green);padding:0 12px;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+  .tabbtn{appearance:none;border:none;background:transparent;color:rgba(255,255,255,.72);
+    font-family:Arial,sans-serif;font-size:.86rem;font-weight:600;letter-spacing:.4px;
+    text-transform:uppercase;padding:16px 20px;cursor:pointer;border-bottom:3px solid transparent;transition:.15s}
+  .tabbtn:hover{color:#fff;background:rgba(255,255,255,.05)}
+  .tabbtn.active{color:#fff;border-bottom-color:var(--fo-copper)}
+
+  main{max-width:1080px;margin:0 auto;padding:38px 26px 80px}
+  .tabpane{display:none;animation:fade .25s ease}
+  .tabpane.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section-label{font-size:.85rem;font-weight:600;color:var(--fo-copper);text-transform:uppercase;letter-spacing:1px}
+  h2.sec{font-size:1.6rem;font-weight:700;color:var(--fo-green);margin:6px 0 4px}
+  .section-rule{height:1px;background:var(--fo-copper);opacity:.5;margin:10px 0 22px}
+  h3.sub{font-size:1.18rem;font-weight:700;color:var(--fo-green);margin:30px 0 6px}
+  p.lead{font-size:1.05rem;color:var(--fo-gray-dark);margin-bottom:8px}
+  p{margin-bottom:12px}
+  .intro-block{background:var(--fo-gray-light);border-left:3px solid var(--fo-copper);
+    padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:26px}
+  .intro-block p:last-child{margin-bottom:0}
+
+  /* ---------- PROCESS CARDS ---------- */
+  .step{position:relative;background:var(--fo-white);border:1px solid var(--fo-gray-border);
+    border-radius:10px;padding:20px 22px 18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .step:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;
+    background:var(--fo-copper);border-radius:3px}
+  .step-head{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap}
+  .step-num{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:var(--fo-green);
+    color:#fff;font-family:Georgia,serif;font-weight:700;font-size:.95rem;display:flex;
+    align-items:center;justify-content:center}
+  .step-title{font-family:Georgia,serif;font-size:1.12rem;font-weight:700;color:var(--fo-green);flex:1 1 auto}
+  .badge{font-size:.66rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+    padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .b-auto{background:var(--fo-copper-muted);color:var(--fo-copper)}
+  .b-manual{background:#eef1ee;color:var(--fo-green-light)}
+  .b-shared{background:#e7f0ea;color:var(--fo-strength-border)}
+  .step-what{color:var(--fo-gray-dark);margin:6px 0 14px;padding-left:46px}
+  .cadence{padding-left:46px;font-size:.82rem;color:var(--fo-gray-medium);margin-top:-8px;margin-bottom:12px}
+  .cadence b{color:var(--fo-copper)}
+
+  .io{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-left:46px}
+  @media(max-width:720px){.io{grid-template-columns:1fr}.step-what,.cadence,.io{padding-left:0}}
+  .io-col{background:var(--fo-gray-light);border:1px solid var(--fo-gray-border);border-radius:8px;padding:10px 12px}
+  .io-col .lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--fo-gray-medium);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+  .io-tools .lbl{color:var(--fo-copper)}
+  .io-out .lbl{color:var(--fo-strength-border)}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{font-size:.76rem;padding:3px 8px;border-radius:6px;background:#fff;border:1px solid var(--fo-gray-border);
+    color:var(--fo-gray-dark);line-height:1.35}
+  .io-tools .chip{border-color:rgba(162,106,58,.35);background:rgba(162,106,58,.06)}
+  .io-out .chip{border-color:rgba(56,161,105,.35);background:rgba(56,161,105,.06)}
+  .chip code{font-family:'SF Mono','Fira Code',Consolas,monospace;font-size:.72rem;color:var(--fo-green-light)}
+  .io-col ul{list-style:none;font-size:.78rem;color:var(--fo-gray-dark)}
+  .io-col li{padding:2px 0 2px 12px;position:relative}
+  .io-col li:before{content:"›";position:absolute;left:0;color:var(--fo-copper);font-weight:700}
+
+  /* ---------- PIPELINE DIAGRAM ---------- */
+  .flow{background:linear-gradient(to bottom,var(--fo-green),var(--fo-green-light));
+    border-radius:12px;padding:26px 22px;color:#fff;margin:8px 0 30px}
+  .flow .sources{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+  .src{flex:1 1 300px;max-width:420px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+    border-radius:10px;padding:14px 16px}
+  .src h4{color:#fff;font-size:1rem;margin-bottom:4px}
+  .src .tag{font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;color:var(--fo-copper-hover);font-weight:700}
+  .src p{color:rgba(255,255,255,.82);font-size:.82rem;margin:4px 0 0}
+  .merge-arrow{text-align:center;font-size:1.4rem;color:var(--fo-copper-hover);margin:4px 0}
+  .shared-rail{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.28);
+    border-radius:10px;padding:14px 12px;margin-top:6px}
+  .shared-rail .rail-lbl{text-align:center;font-size:.7rem;text-transform:uppercase;letter-spacing:1px;
+    color:var(--fo-copper-hover);font-weight:700;margin-bottom:10px}
+  .stages{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px}
+  .stage{background:var(--fo-white);color:var(--fo-green);font-weight:700;font-size:.8rem;
+    padding:8px 12px;border-radius:8px;font-family:Georgia,serif}
+  .stage-arrow{color:var(--fo-copper-hover);font-weight:700}
+
+  /* ---------- TABLES ---------- */
+  table{width:100%;border-collapse:collapse;margin:6px 0 22px;font-size:.9rem}
+  thead th{background:var(--fo-green);color:#fff;text-transform:uppercase;font-size:.76rem;
+    letter-spacing:.5px;text-align:left;padding:10px 12px;font-weight:600}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--fo-gray-border);vertical-align:top;color:var(--fo-gray-dark)}
+  tbody tr:nth-child(even){background:var(--fo-gray-light)}
+  td code,.mono{font-family:'SF Mono','Fira Code',Consolas,monospace;font-size:.8rem;color:var(--fo-green-light)}
+  .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* ---------- MISC ---------- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  .infocard{background:var(--fo-gray-light);border:1px solid var(--fo-gray-border);border-radius:10px;padding:16px 18px}
+  .infocard h4{color:var(--fo-green);font-size:1.02rem;margin-bottom:6px}
+  .infocard .fn{font-family:'SF Mono','Fira Code',Consolas,monospace;font-size:.78rem;color:var(--fo-copper);display:block;margin-bottom:6px}
+  .infocard p{font-size:.85rem;margin-bottom:0}
+  .callout{background:var(--fo-copper-muted);border:1px solid rgba(162,106,58,.3);border-radius:8px;
+    padding:12px 16px;margin:4px 0 22px;font-size:.9rem}
+  .callout b{color:var(--fo-copper)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;background:var(--fo-gray-light);border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:.82rem}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .handoff{display:flex;align-items:center;gap:10px;background:#e7f0ea;border:1px dashed var(--fo-strength-border);
+    border-radius:10px;padding:14px 18px;margin:20px 0 6px;font-size:.92rem;color:var(--fo-green)}
+  .handoff .arrow{font-size:1.4rem;color:var(--fo-strength-border)}
+  .handoff a{font-weight:700;cursor:pointer}
+  .footer{text-align:center;color:var(--fo-gray-medium);font-size:.8rem;padding:26px;border-top:1px solid var(--fo-gray-border)}
+  .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 20px}
+  .pill{background:#fff;border:1px solid var(--fo-gray-border);border-radius:20px;padding:5px 13px;font-size:.82rem}
+  .pill b{color:var(--fo-green)}
+
+  /* ---------- TBD / PLANNED ---------- */
+  .b-tbd{background:#EEF2FF;color:#4F46E5;border:1px dashed #A5B4FC}
+  .chip.tbd{border:1px dashed #A5B4FC;background:#EEF2FF;color:#4F46E5}
+  .chip.tbd code{color:#4F46E5}
+  .tbd-note{background:#EEF2FF;border:1px dashed #A5B4FC;border-radius:8px;padding:12px 16px;
+    margin:4px 0 14px;font-size:.88rem;color:#3730A3}
+  .tbd-note b{color:#4F46E5}
+  .tbd-note .lbl{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.6px;
+    text-transform:uppercase;color:#4F46E5;background:#fff;border:1px dashed #A5B4FC;
+    border-radius:20px;padding:2px 9px;margin-right:8px}
+
+  /* ---------- FULL-PROCESS DIAGRAM ---------- */
+  .diagram-legend{display:flex;gap:16px;flex-wrap:wrap;background:var(--fo-gray-light);
+    border-radius:8px;padding:12px 16px;margin:0 0 22px;font-size:.82rem}
+  .diagram-legend span{display:inline-flex;align-items:center;gap:6px}
+  .lg-swatch{width:26px;height:14px;border-radius:4px;display:inline-block;border:1px solid}
+  .lg-auto{background:rgba(162,106,58,.10);border-color:var(--fo-copper)}
+  .lg-manual{background:#eef1ee;border-color:var(--fo-green-light)}
+  .lg-tbd{background:#EEF2FF;border:1px dashed #A5B4FC}
+
+  .dmap{display:flex;flex-direction:column;gap:0;margin:4px 0 12px}
+  .dband{border-radius:12px;padding:18px 18px 20px;margin-bottom:4px}
+  .dband.sourcing{background:linear-gradient(to bottom,var(--fo-green),var(--fo-green-light));color:#fff}
+  .dband.shared{background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)}
+  .dband-lbl{text-align:center;font-size:.72rem;text-transform:uppercase;letter-spacing:1.2px;
+    font-weight:700;margin-bottom:14px}
+  .dband.sourcing .dband-lbl{color:var(--fo-copper-hover)}
+  .dband.shared .dband-lbl{color:var(--fo-copper)}
+  .lanes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.lanes{grid-template-columns:1fr}}
+  .lane{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 12px 14px}
+  .lane.plain{background:#fff;border:1px solid var(--fo-gray-border)}
+  .lane-h{font-family:Georgia,serif;font-weight:700;font-size:.98rem;margin-bottom:2px}
+  .lane.plain .lane-h{color:var(--fo-green)}
+  .lane-tag{font-size:.66rem;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:10px}
+  .dchain{display:flex;flex-direction:column;align-items:stretch;gap:0}
+  .dnode{background:#fff;border:1px solid var(--fo-gray-border);border-left:4px solid var(--fo-copper);
+    border-radius:8px;padding:8px 11px;position:relative}
+  .dnode.manual{border-left-color:var(--fo-green-light)}
+  .dnode.tbd{border-left:4px dashed #6366F1;border-top:1px dashed #A5B4FC;border-right:1px dashed #A5B4FC;border-bottom:1px dashed #A5B4FC;background:#F5F7FF}
+  .dnode .dn-t{font-weight:700;font-size:.86rem;color:var(--fo-green);font-family:Georgia,serif}
+  .dnode .dn-c{font-size:.74rem;color:var(--fo-gray-medium);line-height:1.4;margin-top:1px}
+  .dnode .dn-c code{font-size:.7rem;color:var(--fo-copper);font-family:'SF Mono',Consolas,monospace}
+  .dnode.tbd .dn-t{color:#4F46E5}
+  .darrow{align-self:center;color:var(--fo-copper);font-weight:700;font-size:1.1rem;line-height:1;padding:4px 0}
+  .lane .darrow{color:var(--fo-copper-hover)}
+  .dmini{font-size:.72rem;margin-top:6px;padding:6px 9px;border-radius:6px;
+    background:rgba(255,255,255,.10);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.9)}
+  .converge{text-align:center;font-size:.9rem;color:var(--fo-copper);font-weight:700;
+    padding:10px 0 4px;letter-spacing:.5px}
+  .converge .big{font-size:1.5rem;display:block;line-height:1}
+  .spine{max-width:640px;margin:0 auto}
+  .spine .dnode{border-left-color:var(--fo-strength-border)}
+  .spine .dnode.tbd{border-left-color:#6366F1}
+  .spine .darrow{color:var(--fo-strength-border)}
+  .sidecar{background:#e7f0ea;border:1px dashed var(--fo-strength-border);border-radius:8px;
+    padding:9px 12px;font-size:.76rem;color:var(--fo-green);margin:2px auto 0;max-width:640px}
+  .sidecar b{color:var(--fo-strength-border)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="brandname">FOUNDERS' OAK</div>
+  <div class="rule"></div>
+  <h1>Deal Flow Operating System</h1>
+  <div class="subtitle">How opportunities are sourced, analyzed, and turned into offers</div>
+  <div class="meta">Process Review &middot; Brokered &amp; Proprietary Channels &middot; July 2026</div>
+</header>
+
+<nav class="tabbar">
+  <button class="tabbtn active" data-tab="overview">Overview</button>
+  <button class="tabbtn" data-tab="brokered">Brokered</button>
+  <button class="tabbtn" data-tab="proprietary">Proprietary</button>
+  <button class="tabbtn" data-tab="shared">Shared Pipeline</button>
+  <button class="tabbtn" data-tab="diagram">Process Diagram</button>
+  <button class="tabbtn" data-tab="stack">Tools &amp; Scripts</button>
+</nav>
+
+<main>
+
+<!-- ============================ OVERVIEW ============================ -->
+<section id="overview" class="tabpane active">
+  <span class="section-label">The Big Picture</span>
+  <h2 class="sec">Two origination engines, one analysis pipeline</h2>
+  <div class="section-rule"></div>
+
+  <p class="lead">Founders' Oak runs deal flow like a search fund with an automation layer bolted on. Opportunities enter through <b>two channels</b> &mdash; deals that come <b>to us</b> (brokered) and deals we <b>go find</b> (proprietary). Both funnel into the same scoring, modeling, research, and offer machinery.</p>
+
+  <div class="flow">
+    <div class="sources">
+      <div class="src">
+        <div class="tag">Channel 1 &middot; Inbound</div>
+        <h4>Brokered</h4>
+        <p>BizBuySell scraping + inbound broker relationships. Listings come pre-packaged with a CIM. High volume, more competition.</p>
+      </div>
+      <div class="src">
+        <div class="tag">Channel 2 &middot; Outbound</div>
+        <h4>Proprietary</h4>
+        <p>Thesis-driven, off-market origination. We build verified owner lists by industry + geography and reach out directly. Lower volume, no auction.</p>
+      </div>
+    </div>
+    <div class="merge-arrow">&#9660; &nbsp; both converge &nbsp; &#9660;</div>
+    <div class="shared-rail">
+      <div class="rail-lbl">Shared Analysis &amp; Offer Pipeline</div>
+      <div class="stages">
+        <span class="stage">CIM Review</span><span class="stage-arrow">&rsaquo;</span>
+        <span class="stage">BST + LBO</span><span class="stage-arrow">&rsaquo;</span>
+        <span class="stage">Decision Gate</span><span class="stage-arrow">&rsaquo;</span>
+        <span class="stage">Market Research</span><span class="stage-arrow">&rsaquo;</span>
+        <span class="stage">Call Prep</span><span class="stage-arrow">&rsaquo;</span>
+        <span class="stage">Meeting Notes</span><span class="stage-arrow">&rsaquo;</span>
+        <span class="stage">IOI</span><span class="stage-arrow">&rsaquo;</span>
+        <span class="stage">LOI &rarr; Close</span>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">How to read this document</h3>
+  <p>Each channel is broken into numbered <b>process steps</b>. Every step names the <b style="color:var(--fo-copper)">tools</b> it runs on, the <b>inputs</b> it consumes, and the <b style="color:var(--fo-strength-border)">outputs</b> it produces. Steps are tagged by how they run:</p>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--fo-copper)"></span> <b>Automated</b> — a scheduled task runs it on a cadence</span>
+    <span><span class="dot" style="background:var(--fo-green-light)"></span> <b>Manual</b> — Thomas does it (often with Claude assist)</span>
+    <span><span class="dot" style="background:var(--fo-strength-border)"></span> <b>Shared</b> — same step serves both channels</span>
+    <span><span class="dot" style="background:#6366F1;border:1px dashed #A5B4FC"></span> <b>TBD</b> — planned, not yet built</span>
+  </div>
+
+  <h3 class="sub">The automation layer at a glance</h3>
+  <p>Ten scheduled tasks keep the pipeline moving without manual babysitting &mdash; scraping, inbox triage, CIM analysis, research, and weekly review all run on their own clocks. Full detail on the <a data-goto="shared">Shared Pipeline &amp; Tools</a> tab.</p>
+  <table>
+    <thead><tr><th>Scheduled task</th><th>Cadence</th><th>Channel</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>bizbuysell-daily-digest</code></td><td>Mon/Wed/Fri 5pm</td><td>Brokered</td><td>Scrape BizBuySell (CF &ge; $750K), update tracker, email digest</td></tr>
+      <tr><td><code>daily-inbox-review</code></td><td>Daily 7am</td><td>Both</td><td>Scan all Gmail, update statuses, detect CIMs, refresh dashboard</td></tr>
+      <tr><td><code>nda-reply-processor</code></td><td>Daily 10am &amp; 10pm</td><td>Brokered</td><td>Process NDA replies, submit broker contact forms</td></tr>
+      <tr><td><code>cim-deal-review</code></td><td>Daily 8am / 1pm / 6pm</td><td>Both</td><td>Run BST + LBO on one unreviewed CIM, email recommendation</td></tr>
+      <tr><td><code>broker-call-prep-generator</code></td><td>Daily 8:45 / 1:45 / 6:45</td><td>Both</td><td>Draft call-prep docs in each deal's Meetings/ folder</td></tr>
+      <tr><td><code>market-research-processor</code></td><td>Daily 10am</td><td>Both</td><td>Detect "proceed" replies, run market research skill</td></tr>
+      <tr><td><code>deal-flow-weekly-review</code></td><td>Sunday 7pm</td><td>Both</td><td>Weekly quant + qualitative analysis, dashboard, email</td></tr>
+      <tr><td><code>agent-audit-review</code></td><td>Tue/Fri 2am</td><td>Meta</td><td>Audit other task runs, flag errors + token issues</td></tr>
+      <tr><td><code>tx-reinstatement-check</code></td><td>Mon/Thu 9am</td><td>Admin</td><td>Track Founders' Oak Capital LLC TX entity status</td></tr>
+      <tr><td><code>formspree-leads-weekly-sweep</code></td><td>Monday 7am</td><td>Web leads</td><td>Sweep landing-page form submissions into lead sheets</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Shared infrastructure both channels rely on</h3>
+  <div class="grid2">
+    <div class="infocard"><h4>Deal Flow Tracker</h4><span class="fn">Deal_Flow_Tracker.xlsx</span><p>Single source of truth. Every deal &mdash; brokered or proprietary &mdash; lives on the "Deal Flow" sheet with 19 columns (ID, financials, status, status history, broker, notes).</p></div>
+    <div class="infocard"><h4>Deal Flow Dashboard</h4><span class="fn">Deal_Flow_Dashboard.html</span><p>Self-contained HTML view: industry breakdowns, multiples, funnel metrics, weekly analysis, and CIM review scorecards. Rebuilt from the tracker.</p></div>
+    <div class="infocard"><h4>Industry Taxonomy</h4><span class="fn">Industry_Taxonomy.md</span><p>17 canonical industry categories. Every deal is classified against this list so scoring, multiples, and research stay comparable.</p></div>
+    <div class="infocard"><h4>Industry Multiples</h4><span class="fn">Industry_Multiples.md</span><p>Asking multiples by industry, derived from the tracker. Feeds LBO price sanity-checks and market research benchmarks.</p></div>
+    <div class="infocard"><h4>Deal-Call Capture <span class="badge b-auto" style="vertical-align:middle">New</span></h4><span class="fn">Deal_Call_Capture/ &middot; Call_Notes/</span><p>Self-hosted meeting-note pipeline (added after this doc's first draft): record &rarr; local GPU transcription with speaker labels &rarr; Claude writes a structured deal note. Feeds Call Prep and the IOI. See the <a data-goto="shared">Shared Pipeline</a> tab, step 7.</p></div>
+  </div>
+  <div class="callout">Both channels write to the <b>same tracker</b> and flow through the <b>same deal-review folders</b> (<code>Deal_Reviews/{id} - {name}/</code>). A proprietary deal is functionally a brokered deal that we sourced ourselves &mdash; once a CIM or financials arrive, the two paths are identical.</div>
+</section>
+
+<!-- ============================ BROKERED ============================ -->
+<section id="brokered" class="tabpane">
+  <span class="section-label">Channel 1 &middot; Inbound</span>
+  <h2 class="sec">Brokered deal flow</h2>
+  <div class="section-rule"></div>
+  <div class="intro-block">
+    <p>Deals that come <b>to us</b>: business-for-sale listings scraped from <b>BizBuySell</b>, plus <b>inbound broker outreach</b> (direct emails, teasers, off-platform introductions). Higher volume and pre-packaged with a CIM, but competitive &mdash; often an auction. The job here is to <b>filter fast, understand the listing, and get behind the NDA</b> before running full analysis.</p>
+  </div>
+
+  <div class="pill-row">
+    <span class="pill"><b>Filter:</b> Cash flow &ge; $750K</span>
+    <span class="pill"><b>Priority states:</b> TX, OK, AR</span>
+    <span class="pill"><b>Classify:</b> 17-category taxonomy</span>
+    <span class="pill"><b>ID format:</b> numeric (BizBuySell) &middot; INB-xxx (inbound)</span>
+  </div>
+
+  <!-- B1 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">1</span><span class="step-title">Source &amp; scrape BizBuySell (multi-actor failover)</span><span class="badge b-auto">Automated</span></div>
+    <p class="step-what">Scrape new BizBuySell listings above the cash-flow floor, dedupe against everything already in the tracker, and stage the fresh ones. Rather than depending on a single Apify actor, the scraper runs a <b>tiered failover</b>: it tries each enabled actor in priority order until one returns listings, <b>auto-widens</b> the date window (3d&nbsp;&rarr;&nbsp;7d&nbsp;&rarr;&nbsp;30d) if a run comes back thin, dedupes by BizBuySell <code>productId</code>, and <b>stops loudly</b> (an alert email) only if <em>every</em> actor returns zero. This is the top of the inbound funnel.</p>
+    <div class="cadence"><b>Runs:</b> <code>bizbuysell-daily-digest</code> &mdash; Mon/Wed/Fri 5:00pm &middot; direct Apify API (not the MCP), item cap 200/actor</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>scrape_bizbuysell.py</code></span>
+        <span class="chip"><code>crawlerbros</code> — primary, enriched</span>
+        <span class="chip"><code>fatihtahta</code> — failover</span>
+        <span class="chip"><code>good_cheap</code> — failover</span>
+        <span class="chip tbd"><code>acquistion-automation</code> / <code>lexis</code> — paid, off</span>
+        <span class="chip">dedupe by <code>productId</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>BizBuySell live listings</li>
+        <li>Cash-flow filter &ge; $750K</li>
+        <li>Existing tracker rows (dedupe key)</li>
+        <li><code>ACTOR_TIERS</code> priority list</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>New listing records (enriched: CF, gross rev, EBITDA)</li>
+        <li>Deduped candidate set</li>
+        <li>Loud <code>all_actors_empty</code> alarm if all fail</li>
+      </ul></div>
+    </div>
+    <div class="callout"><b>Why multi-actor:</b> on <b>2026-07-03</b> the long-time production actor (<code>fatihtahta</code>) died — a BizBuySell-side change zeroed it out on every build and input. A single-actor scraper would have silently returned 0 listings. The rebuild makes sourcing resilient to any one actor dying: <code>crawlerbros</code> is now primary (free + richest fields), with the others as ordered fallbacks. Full bake-off &amp; failover design in <span class="mono">Scraper_Actor_Options.md</span>.</div>
+    <div class="tbd-note"><span class="lbl">TBD</span> <b>BizQuest as a cross-marketplace backstop</b> (<code>parseforge/bizquest-scraper</code>) for when <em>all</em> BizBuySell actors are down at once. It lists largely the same businesses under its own <code>businessId</code>, so it needs a fuzzy name+city match (not ID dedupe) and a distinct <code>BQ-</code> id namespace before it can run alongside BBS.</div>
+  </div>
+
+  <!-- B2 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">2</span><span class="step-title">Understand the listing &amp; digest it</span><span class="badge b-auto">Automated</span></div>
+    <p class="step-what">Each new listing is read and enriched: computed asking multiple (price &divide; cash flow), industry classification against the taxonomy, and priority flag. Results are packaged into an emailed digest with a one-click reply template, and published to a hosted digest form.</p>
+    <div class="cadence"><b>Runs:</b> <code>bizbuysell-daily-digest</code> (same run as Step 1)</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>generate_digest_form.py</code></span>
+        <span class="chip">Gmail (draft + send)</span>
+        <span class="chip">GitHub Pages (git push)</span>
+        <span class="chip"><code>Industry_Taxonomy.md</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Deduped listings from Step 1</li>
+        <li>Price, revenue, cash flow fields</li>
+        <li>17-category taxonomy</li>
+        <li>Priority rule (TX/OK/AR = HIGH)</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Digest email to Thomas</li>
+        <li>Hosted form: <code>bbs_digest_form.html</code></li>
+        <li>Reply template (pick deals for NDA)</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- B3 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">3</span><span class="step-title">Log to the Deal Flow Tracker</span><span class="badge b-auto">Automated</span></div>
+    <p class="step-what">Qualified listings are written to the "Deal Flow" sheet with a full schema row: date, listing ID, name, source, priority, location, financials, the multiple formula, URL, action, status ("New"), notes (date-prefixed), and broker.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">openpyxl</span>
+        <span class="chip"><code>Deal_Flow_Tracker.xlsx</code></span>
+        <span class="chip"><code>refresh_dashboard.py</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Enriched listing from Step 2</li>
+        <li>Taxonomy classification</li>
+        <li>Multiple formula (col M)</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>New tracker row (status "New")</li>
+        <li>Refreshed dashboard</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- B4 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">4</span><span class="step-title">Capture inbound broker deals</span><span class="badge b-auto">Automated</span></div>
+    <p class="step-what">Not everything comes from BizBuySell. Broker emails, teasers, and direct intros are caught by the daily inbox scan, assigned the next <code>INB-xxx</code> ID, classified, and written straight onto the Deal Flow sheet (source = "Inbound – {Broker}"). If a CIM/exec summary is attached, status jumps to "CIM Received."</p>
+    <div class="cadence"><b>Runs:</b> <code>daily-inbox-review</code> &mdash; every day 7:00am</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Gmail MCP (two-pass scan)</span>
+        <span class="chip">openpyxl</span>
+        <span class="chip"><code>Deal_Flow_Tracker.xlsx</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>All Gmail activity since last run</li>
+        <li>Broker name, business, financials</li>
+        <li>Highest existing INB number</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Inbound deal row (INB-xxx)</li>
+        <li>Status "New" or "CIM Received"</li>
+        <li>Digest of inbox changes</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- B5 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">5</span><span class="step-title">Request NDA / contact the broker</span><span class="badge b-auto">Automated</span></div>
+    <p class="step-what">When Thomas replies to a digest naming the listings he wants, the processor submits the BizBuySell contact form for each ID (or drafts the broker email for off-platform deals), then advances the deal's status to "Contacted" / "NDA" and logs the transition in status history.</p>
+    <div class="cadence"><b>Runs:</b> <code>nda-reply-processor</code> &mdash; daily 10:00am &amp; 10:00pm</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Gmail MCP (read reply)</span>
+        <span class="chip">Claude-in-Chrome (form submit)</span>
+        <span class="chip">BizBuySell contact forms</span>
+        <span class="chip">openpyxl</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Thomas's reply w/ chosen listing IDs</li>
+        <li>Broker contact details</li>
+        <li>NDA / buyer profile info</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Submitted contact forms / drafts</li>
+        <li>Status &rarr; Contacted / NDA</li>
+        <li>Status-history entry</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- B6 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">6</span><span class="step-title">CIM received &amp; reconciled</span><span class="badge b-auto">Automated</span></div>
+    <p class="step-what">Once the NDA clears, the broker sends the CIM. A dedicated CIM-detection loop in the inbox scan spots it, files it under <code>CIMs/{id} - {name}/</code>, reconciles it against the tracker, and moves the deal to "CIM / Review" &mdash; the trigger for analysis.</p>
+    <div class="cadence"><b>Runs:</b> <code>daily-inbox-review</code> (CIM detection loop + contact-form confirmation check)</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Gmail MCP (attachment pull)</span>
+        <span class="chip">File system (<code>CIMs/</code>)</span>
+        <span class="chip">openpyxl</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Broker email + CIM attachment</li>
+        <li>Existing tracker row</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>CIM saved to <code>CIMs/</code></li>
+        <li>Status &rarr; CIM / Review</li>
+        <li>Ready for shared pipeline</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="handoff"><span class="arrow">&rarr;</span> <div>With a CIM in hand, the deal enters the <a data-goto="shared">Shared Analysis &amp; Offer Pipeline</a>: CIM Review &rarr; BST + LBO &rarr; Decision Gate &rarr; Market Research &rarr; Call Prep &rarr; IOI.</div></div>
+</section>
+
+<!-- ============================ PROPRIETARY ============================ -->
+<section id="proprietary" class="tabpane">
+  <span class="section-label">Channel 2 &middot; Outbound</span>
+  <h2 class="sec">Proprietary deal flow</h2>
+  <div class="section-rule"></div>
+  <div class="intro-block">
+    <p>Deals we <b>go find</b>. Instead of waiting for listings, we pick a thesis (an industry + geography we want to own), then build a <b>verified list of business owners</b> from public and paid data sources and reach out directly. No broker, no auction, no CIM up front &mdash; just owners who may not even be actively selling. This is run by the <b>Proprietary Search pipeline</b> (the <code>build-prospect-list</code> skill), a 20+ step discovery &rarr; enrichment &rarr; verification engine.</p>
+  </div>
+
+  <div class="pill-row">
+    <span class="pill"><b>Live verticals:</b> Tree Services &middot; HVAC &middot; Print Finishing &middot; VoIP/UCaaS &middot; Hazmat</span>
+    <span class="pill"><b>Geo:</b> TX (OK, AR next)</span>
+    <span class="pill"><b>Target set:</b> ~1,500 leads/run</span>
+    <span class="pill"><b>Tiering:</b> TIER_1 → TIER_5 / NOT_READY</span>
+  </div>
+
+  <!-- P1 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">1</span><span class="step-title">Set the thesis (industry &times; geography)</span><span class="badge b-manual">Manual</span></div>
+    <p class="step-what">Pick the target pair to hunt &mdash; e.g., "tree services in TX." Theses are documented and drive everything downstream. The pipeline is config-driven, so a new vertical is just a new pair of config files.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>Proprietary/Theses/</code></span>
+        <span class="chip"><code>Industry_Taxonomy.md</code></span>
+        <span class="chip">Market research (validation)</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Target industry + state</li>
+        <li>Fragmentation / roll-up logic</li>
+        <li>Priority-state preference</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Named thesis (industry, geo)</li>
+        <li>Go decision to build a list</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- P2 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">2</span><span class="step-title">Configure the target (YAML configs)</span><span class="badge b-manual">Manual</span></div>
+    <p class="step-what">Every pipeline script reads two config files: an <b>industry YAML</b> (NAICS codes, keyword regex, false-positive block/allow lists, certifications, name-extraction rules) and a <b>geo YAML</b> (state, metros, scrape cities, Secretary-of-State source, licensing sources). New industries are scaffolded from the closest existing template.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>configs/{industry}.yaml</code></span>
+        <span class="chip"><code>configs/geo/{state}.yaml</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>NAICS codes (e.g., 561730)</li>
+        <li>Industry keyword regex</li>
+        <li>Block/allow lists, certifications</li>
+        <li>Metros + SOS/licensing sources</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Validated config pair</li>
+        <li>Reusable across every step</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- P3 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">3</span><span class="step-title">Discovery — cast the net</span><span class="badge b-manual">Manual</span></div>
+    <p class="step-what">Pull candidate businesses from multiple public + scraped sources in parallel: federal registration/contract data, Google Maps, and the Better Business Bureau. Thesis-specific verticals add regulator pulls (e.g., EPA/TCEQ for hazmat). First paid step (Google Maps via Apify) is gated behind an explicit cost confirmation.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>pull_sam.py</code> → SAM.gov</span>
+        <span class="chip"><code>pull_usaspending.py</code></span>
+        <span class="chip"><code>pull_apify_gmaps.py</code> → Apify</span>
+        <span class="chip"><code>pull_bbb.py</code> → BBB</span>
+        <span class="chip"><code>pull_epa_rcra.py</code> / <code>pull_tceq_nor.py</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Industry + geo configs</li>
+        <li>NAICS codes, search terms</li>
+        <li>Target metros / cities</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Raw candidate lists per source</li>
+        <li>Business name, address, phone, web</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- P4 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">4</span><span class="step-title">Merge, dedupe &amp; filter false positives</span><span class="badge b-manual">Manual</span></div>
+    <p class="step-what">Combine all sources into one set, drop duplicates and anything already in our tracker, then apply the config's block/allow lists to strip false positives (e.g., a "tree" match that's actually a dental office). A false-positive rate above 20% signals the config needs tuning.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>merge_raw.py</code></span>
+        <span class="chip"><code>dedupe_vs_existing.py</code></span>
+        <span class="chip"><code>step0_filter_false_positives.py</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Raw source lists (Step 3)</li>
+        <li>Existing lead history</li>
+        <li>Blocklist / allowlist regex</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Single deduped, clean set</li>
+        <li>FP + duplicate counts</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- P5 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">5</span><span class="step-title">Enrichment — find the owner</span><span class="badge b-manual">Manual</span></div>
+    <p class="step-what">The highest-value work: attach a real owner name to each business. Secretary-of-State officer lookups are the most reliable source, backed by BBB detail scrapes, website scraping (owner names + certifications), state licensing cross-refs (TDLR), social profiles, and a Google-search backfill for stragglers. Owner names pass strict validation.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>step1_sos_lookup.py</code> → Sec. of State</span>
+        <span class="chip"><code>pull_bbb.py --detail</code></span>
+        <span class="chip"><code>enrich_layer1_website.py</code></span>
+        <span class="chip"><code>step2_tdlr_crossref.py</code></span>
+        <span class="chip"><code>step5_instagram.py</code> / Facebook</span>
+        <span class="chip"><code>enrich_layer_google_search.py</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Clean business set (Step 4)</li>
+        <li>Legal entity / DBA names</li>
+        <li>Websites, licensing registries</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Owner / officer names</li>
+        <li>Certifications, years in business</li>
+        <li>Validated, cleaned contacts</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- P6 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">6</span><span class="step-title">Contact discovery &amp; email verification</span><span class="badge b-manual">Manual</span></div>
+    <p class="step-what">Turn owner names into deliverable email addresses: generate likely patterns, seed with a cheap finder, then run the <b>winner</b> for each lead through Hunter's SMTP verifier. Policy: every email that ships is SMTP-verified. Apollo enrichment is available but skipped by default (free-tier rate cap makes it uneconomic at 1,500 leads).</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>step_email_patterns.py</code></span>
+        <span class="chip"><code>enrich_layer6_hunter.py</code> → Hunter</span>
+        <span class="chip"><code>verify_emails_hunter.py</code> (SMTP)</span>
+        <span class="chip">Apollo (optional)</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Owner names + company domains</li>
+        <li>Hunter API key</li>
+        <li>Email pattern rules</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Verified-deliverable emails</li>
+        <li>Catch-all vs valid flags</li>
+        <li><code>do_not_send_reason</code> column</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- P7 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">7</span><span class="step-title">Score, tier &amp; finalize the list</span><span class="badge b-manual">Manual</span></div>
+    <p class="step-what">Merge every enrichment layer, score each lead on completeness + confidence, and assign a tier from TIER_1 (verified email, strong owner name, full profile) down to TIER_5 / NOT_READY. Output is a versioned CSV, reviewable in a local Lead Browser with filtering and export.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>step8_merge_and_finalize_v2.py</code></span>
+        <span class="chip"><code>step9_flag_lead_warnings.py</code></span>
+        <span class="chip">Lead Browser (<code>web/lead_browser.html</code>)</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>All enrichment + verification data</li>
+        <li>Scoring / tier thresholds</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li><code>leads_{industry}_{geo}_v{N}.csv</code></li>
+        <li>Tiered, outreach-ready list</li>
+        <li><code>run_log.md</code> (cost, counts)</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- P8 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">8</span><span class="step-title">Direct outreach — email campaign + calls</span><span class="badge b-manual">Manual</span><span class="badge b-tbd">Automation TBD</span></div>
+    <p class="step-what">Work the tiered list top-down. Personalized cold email to owners opens a direct, off-market conversation &mdash; no broker in the middle. Interested owners share financials or a light CIM, which converts the lead into a live deal. Today this is hand-sent from Gmail; the plan is to feed the finished thesis list straight into a managed multi-step campaign.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Gmail (manual, today)</span>
+        <span class="chip tbd">Instantly MCP — campaign</span>
+        <span class="chip tbd">Phone / other outreach</span>
+        <span class="chip">Landing pages + Formspree</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li><code>leads_{industry}_{geo}_v{N}.csv</code> (TIER_1..2)</li>
+        <li>Owner name + business context</li>
+        <li>Thesis-specific messaging</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Owner replies / conversations</li>
+        <li>Requests for financials</li>
+      </ul></div>
+    </div>
+    <div class="tbd-note"><span class="lbl">TBD</span> <b>Instantly MCP &rarr; email campaign.</b> Wire an <b>Instantly</b> MCP connection so a finished proprietary thesis list (the verified, SMTP-clean <code>leads_*.csv</code>) can be pushed directly into an Instantly email campaign &mdash; mapping owner name + company + thesis angle into a personalized multi-step sequence, with replies routed back to Gmail where <code>daily-inbox-review</code> already logs responders as live deals (step&nbsp;9). Replaces the current copy-paste-from-Gmail flow and the earlier "Apollo campaigns (optional)" idea.</div>
+    <div class="tbd-note"><span class="lbl">TBD</span> <b>Phone calls &amp; other outreach.</b> Layer non-email touches on the same tiered list &mdash; owner phone calls (numbers are already captured during discovery/enrichment) and other channels &mdash; so a lead can be worked across email + phone rather than email-only. Sequencing, call scripts, and where call outcomes get logged are still to be designed.</div>
+  </div>
+
+  <!-- P9 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">9</span><span class="step-title">Log the responder as a live deal</span><span class="badge b-auto">Automated</span></div>
+    <p class="step-what">A responding owner becomes an inbound deal: assigned an <code>INB-xxx</code> ID and written to the Deal Flow sheet (source = "Inbound – Proprietary / {thesis}"). From here it's indistinguishable from a brokered deal &mdash; the daily inbox scan and CIM detection take over.</p>
+    <div class="cadence"><b>Runs:</b> <code>daily-inbox-review</code> picks it up automatically once the owner emails</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Gmail MCP</span>
+        <span class="chip"><code>Deal_Flow_Tracker.xlsx</code></span>
+        <span class="chip"><code>refresh_dashboard.py</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Owner reply + any financials</li>
+        <li>Next available INB ID</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Live deal row (INB-xxx)</li>
+        <li>Status "New" / "CIM Received"</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="handoff"><span class="arrow">&rarr;</span> <div>Once financials or a CIM arrive, the proprietary deal enters the exact same <a data-goto="shared">Shared Analysis &amp; Offer Pipeline</a> as a brokered deal.</div></div>
+</section>
+
+<!-- ============================ SHARED ============================ -->
+<section id="shared" class="tabpane">
+  <span class="section-label">Where both channels converge</span>
+  <h2 class="sec">Shared analysis &amp; offer pipeline</h2>
+  <div class="section-rule"></div>
+  <div class="intro-block">
+    <p>Every deal &mdash; brokered or proprietary &mdash; that reaches a CIM or financials runs through the <b>same core machine</b>: score it, model it, decide, research the market, prep the conversation, <b>capture the call</b>, and make the offer. Three skills power the analysis &mdash; <b>quick-lbo</b> (BST + LBO), <b>market-research</b> (3-layer), and <b>ioi</b> (offer document) &mdash; alongside a self-hosted <b>meeting-capture</b> pipeline (step 7).</p>
+  </div>
+
+  <!-- S1 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">1</span><span class="step-title">CIM review — extract &amp; normalize</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">The <code>quick-lbo</code> skill parses the CIM PDF, pulls a multi-year P&amp;L, and normalizes it &mdash; carefully avoiding double-counting add-backs (if the CIM already shows "Adjusted/Recast" figures, add-back rows are zeroed). Normalization logic is documented right in the model.</p>
+    <div class="cadence"><b>Runs:</b> <code>cim-deal-review</code> &mdash; daily 8am / 1pm / 6pm, one unreviewed CIM per run (numeric + INB)</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">quick-lbo skill</span>
+        <span class="chip">pdfplumber</span>
+        <span class="chip">config.json (extracted financials)</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>CIM PDF from <code>CIMs/</code></li>
+        <li>Multi-year revenue / COGS / OpEx</li>
+        <li>Owner comp + add-backs</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Normalized P&amp;L</li>
+        <li>Deal folder + <code>_working/config.json</code></li>
+        <li>SDE composition breakdown</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">2</span><span class="step-title">BST — score business quality</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">The Business Scoring Tool grades the business on six weighted categories (a <b>weighted</b> average, not a simple one). Location is intentionally low-weighted &mdash; a great business in PA shouldn't be penalized like a weak one in DFW.</p>
+    <div class="io" style="margin-bottom:12px">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>populate_bst.py</code></span>
+        <span class="chip"><code>bst_template.xlsx</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>CIM facts + normalized financials</li>
+        <li>Owner/management situation</li>
+        <li>Scoring config (1–10 per item)</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Weighted BST score /10</li>
+        <li>Category strengths / red flags</li>
+        <li><code>{id}_BST.xlsx</code></li>
+      </ul></div>
+    </div>
+    <table>
+      <thead><tr><th>Category</th><th class="num">Weight</th><th>What it measures</th></tr></thead>
+      <tbody>
+        <tr><td>Size</td><td class="num">20%</td><td>Deal economics — revenue, cash flow, margins, scalability</td></tr>
+        <tr><td>Product</td><td class="num">25%</td><td>Defensibility / moat — differentiation, concentration, recurring revenue</td></tr>
+        <tr><td>Industry</td><td class="num">15%</td><td>Market dynamics — fragmentation, growth, B2B stickiness</td></tr>
+        <tr><td>Owner / Mgmt</td><td class="num">25%</td><td>Transition risk — tenure, motivation, team staying on</td></tr>
+        <tr><td>Growth</td><td class="num">10%</td><td>Upside — clear expansion levers</td></tr>
+        <tr><td>Location</td><td class="num">5%</td><td>Preference signal — within target markets (TX/OK/AR)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- S3 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">3</span><span class="step-title">LBO — model the deal economics</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">A self-funded search LBO: full debt sizing, cash-flow waterfall, DSCR by year, and searcher/investor returns. Equity is 20% of total project cost &mdash; Thomas puts in $100K, investors fund the rest. Purchase price always uses the CIM's stated ask (low end), and every model records a <b>price source</b>.</p>
+    <div class="io" style="margin-bottom:12px">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>populate_lbo.py</code></span>
+        <span class="chip"><code>lbo_template.xlsx</code></span>
+        <span class="chip"><code>Industry_Multiples.md</code> (sanity)</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Normalized EBITDA / SDE</li>
+        <li>Purchase price + price source</li>
+        <li>Debt terms (SBA, seller note)</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li><code>{id}_LBO_Model.xlsx</code></li>
+        <li>DSCR, IRR, MOIC, FCF</li>
+        <li>Revenue-decline tolerance</li>
+      </ul></div>
+    </div>
+    <div class="pill-row" style="margin-bottom:6px">
+      <span class="pill"><b>Capital stack:</b> SBA 7(a) + seller note + conventional + sponsor equity</span>
+      <span class="pill"><b>DSCR floor:</b> 1.25&times;</span>
+      <span class="pill"><b>Target investor IRR:</b> 20–35%</span>
+      <span class="pill"><b>Target MOIC:</b> 3–5&times;</span>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">4</span><span class="step-title">Recommendation &amp; decision gate</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">BST + LBO are combined into a single recommendation and emailed to Thomas with a clear call: STRONG BUY, PROCEED, BORDERLINE, or PASS. Thomas's reply is the gate &mdash; replying <b>"proceed"</b> releases the deal into market research.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Gmail (analysis email)</span>
+        <span class="chip"><code>summary.txt</code></span>
+        <span class="chip">Dashboard CIM Reviews tab</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>BST score + LBO outcomes</li>
+        <li>Commit / walk factors</li>
+        <li>Thresholds (BST &ge;5.5, DSCR &ge;1.25&times;)</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Recommendation email</li>
+        <li>Scorecard on dashboard</li>
+        <li>Thomas's proceed / pass decision</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">5</span><span class="step-title">Market research (3-layer)</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">On "proceed," the <code>market-research</code> skill builds three cached, reusable layers and scores the market. Industry and geography briefs are shared across deals (deduped research); the deal-specific brief synthesizes them with the CIM for a go/no-go.</p>
+    <div class="cadence"><b>Runs:</b> <code>market-research-processor</code> &mdash; daily 10am, scans for "proceed" replies</div>
+    <div class="io" style="margin-bottom:12px">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">market-research skill</span>
+        <span class="chip"><code>census_api.py</code> (NAICS)</span>
+        <span class="chip">WebSearch (Tier-1 sources)</span>
+        <span class="chip">Apollo (competitor enrich)</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Industry + metro of the deal</li>
+        <li>Census / BLS / trade data</li>
+        <li>BST + LBO results, CIM claims</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Industry &amp; Geography briefs</li>
+        <li><code>research_brief.md</code> (deal)</li>
+        <li>Market Attractiveness Score</li>
+      </ul></div>
+    </div>
+    <table>
+      <thead><tr><th>Layer</th><th>Location</th><th>Scope &amp; reuse</th></tr></thead>
+      <tbody>
+        <tr><td><b>1. Industry brief</b></td><td><code>Market_Research/Industries/</code></td><td>TAM, tailwinds, fragmentation, moat, cost structure, 7-dimension attractiveness score. Reused by every deal in that sub-industry.</td></tr>
+        <tr><td><b>2. Geography brief</b></td><td><code>Market_Research/Markets/</code></td><td>Metro population, employment, establishment density, tax climate. Reused by every deal in that metro.</td></tr>
+        <tr><td><b>3. Deal-specific brief</b></td><td><code>Deal_Reviews/{deal}/Market_Research/</code></td><td>Segment mapping, local competitors, bottoms-up TAM, CIM cross-reference, final signal.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- S6 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">6</span><span class="step-title">Broker / seller call prep</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">Before Thomas gets on the phone, a call-prep document is auto-drafted into the deal's Meetings/ folder &mdash; pulling the key BST strengths, LBO questions, and diligence items so the conversation is targeted.</p>
+    <div class="cadence"><b>Runs:</b> <code>broker-call-prep-generator</code> &mdash; daily 8:45 / 1:45 / 6:45, after initial review</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Call-prep task</span>
+        <span class="chip">BST + LBO + CIM inputs</span>
+        <span class="chip"><code>Deal_Reviews/{deal}/Meetings/</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>BST strengths &amp; red flags</li>
+        <li>LBO sensitivities</li>
+        <li>Open diligence questions</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Call-prep doc in Meetings/</li>
+        <li>Talking points + questions</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- S7 — Meeting capture (NEW) -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">7</span><span class="step-title">Capture the call &mdash; transcript &amp; deal note</span><span class="badge b-shared">Shared</span><span class="badge b-auto">New</span></div>
+    <p class="step-what">Added after this doc's first draft. Broker and seller calls are now recorded and turned into structured notes by a <b>self-hosted</b> pipeline: <b>record &rarr; local GPU transcription with speaker labels &rarr; Claude writes a "Deal Call" note</b> (business, ask, revenue, SDE/EBITDA, broker, reason for sale, red flags, follow-ups). Raw audio never leaves the PC. Each Founders' Oak call is also auto-classified by type (Broker &middot; Seller/Owner &middot; Investor &middot; Internal &middot; Service Provider &middot; Networking). These notes feed the IOI's tone and confirmatory items.</p>
+    <div class="cadence"><b>Runs:</b> local background loop &mdash; <code>gdrive_inbox_bridge.ps1</code> (watches a Drive drop-folder) + <code>export_notes.ps1</code> (polls Speakr, writes the note). Not a cloud task. Transcription on WhisperX <code>large-v3</code>; note + classification on Claude.</div>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">Speakr (self-hosted)</span>
+        <span class="chip">WhisperX ASR + pyannote (GPU)</span>
+        <span class="chip"><code>export_notes.ps1</code></span>
+        <span class="chip"><code>gdrive_inbox_bridge.ps1</code></span>
+        <span class="chip"><code>deal_call_template.md</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>Call audio (desktop recorder / phone memo)</li>
+        <li><code>Capture Inbox/{Project}/</code> drop-folder</li>
+        <li>Deal Call summary prompt</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li><code>Call_Notes/{date} - {title}/</code></li>
+        <li><code>summary.md</code> (deal note), <code>transcript.md</code> (timestamped, diarized)</li>
+        <li><code>metadata.json</code> (call type + parties)</li>
+      </ul></div>
+    </div>
+    <div class="tbd-note"><span class="lbl">TBD</span> <b>Auto-link a call to its deal (Phase&nbsp;3b).</b> Match a Broker/Seller call to a specific tracker deal and file the note straight into <code>Deal_Reviews/{id}/Meetings/</code>, write the takeaway back to the tracker, and add a review digest. Also planned: <b>phone capture via Tailscale (Phase&nbsp;2)</b> so calls recorded on a phone flow in the same way.</div>
+  </div>
+
+  <!-- S8 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">8</span><span class="step-title">IOI — make the offer</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">The <code>ioi</code> skill assembles a polished, personalized 3-slide Indication of Interest from the Founders' Oak template &mdash; pulling the offer basis from the LBO (not the tracker list price), tone from broker emails and meeting notes, and confirmatory items from the BST. Thomas confirms the offer range and terms before it's generated.</p>
+    <div class="io" style="margin-bottom:12px">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip">ioi skill</span>
+        <span class="chip">IOI template (.pptx)</span>
+        <span class="chip">pptx pack/unpack + repair</span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>LBO price + capital structure</li>
+        <li>BST strengths + diligence items</li>
+        <li>CIM entity/DBA, broker details</li>
+        <li>Meeting notes, NDA date</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Personalized IOI (.pptx)</li>
+        <li>Saved to deal's Materials/</li>
+        <li>Offer range + terms</li>
+      </ul></div>
+    </div>
+    <div class="pill-row" style="margin-bottom:4px">
+      <span class="pill"><b>Structure:</b> 100% asset purchase</span>
+      <span class="pill"><b>Cash at close:</b> 85–90%</span>
+      <span class="pill"><b>Seller note:</b> 10–15%, 3–5 yr</span>
+      <span class="pill"><b>Exclusivity:</b> 60 days</span>
+      <span class="pill"><b>Diligence:</b> 45 days</span>
+      <span class="pill"><b>Close:</b> 90 days from LOI</span>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="step">
+    <div class="step-head"><span class="step-num">9</span><span class="step-title">Post-IOI → LOI → diligence → close</span><span class="badge b-shared">Shared</span></div>
+    <p class="step-what">Once submitted, the tracker advances the deal through the forward-only status ladder and logs each transition in status history for pipeline-velocity metrics. The dashboard reflects the new stage.</p>
+    <div class="io">
+      <div class="io-col io-tools"><div class="lbl">Tools</div><div class="chips">
+        <span class="chip"><code>Deal_Flow_Tracker.xlsx</code></span>
+        <span class="chip"><code>refresh_dashboard.py</code></span>
+      </div></div>
+      <div class="io-col"><div class="lbl">Inputs</div><ul>
+        <li>IOI submission confirmation</li>
+        <li>Broker / seller responses</li>
+      </ul></div>
+      <div class="io-col io-out"><div class="lbl">Outputs</div><ul>
+        <li>Status &rarr; IOI &rarr; LOI &rarr; Diligence &rarr; Closed</li>
+        <li>Status-history log</li>
+        <li>Updated dashboard funnel</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <p class="lead" style="margin-top:8px"><b>Status ladder (forward-only):</b></p>
+  <div class="stages" style="justify-content:flex-start;margin-bottom:26px">
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">New</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">Contacted</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">NDA</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">CIM / Review</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">Meeting</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">IOI</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">LOI</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-gray-light);border:1px solid var(--fo-gray-border)">Diligence</span><span class="stage-arrow" style="color:var(--fo-copper)">&rsaquo;</span>
+    <span class="stage" style="background:var(--fo-green);color:#fff">Closed</span>
+  </div>
+
+  <span class="section-label">The backbone</span>
+  <h3 class="sub" style="margin-top:6px">Shared data &amp; infrastructure</h3>
+  <div class="grid2">
+    <div class="infocard"><h4>Deal Flow Tracker</h4><span class="fn">Deal_Flow_Tracker.xlsx</span><p>The "Deal Flow" sheet is the master. 19 columns A–S: Date, Listing ID, Name, Source, Priority, State, City, Industry, List Price, Revenue, Cash Flow/SDE, EBITDA, Multiple (formula), URL, Action, Status, Notes, Broker, Status History.</p></div>
+    <div class="infocard"><h4>Deal Flow Dashboard</h4><span class="fn">Deal_Flow_Dashboard.html</span><p>Rebuilt from the tracker by <code>refresh_dashboard.py</code>. Industry mix, multiples analysis, funnel metrics, weekly qualitative analysis, and CIM review scorecards (BST + LBO outcomes).</p></div>
+    <div class="infocard"><h4>Deal review folders</h4><span class="fn">Deal_Reviews/{id} - {name}/</span><p>Per-deal workspace: <code>Analysis/</code> (BST, LBO, CIM), <code>Market_Research/</code> (brief), <code>Meetings/</code> (call notes), <code>Materials/</code> (IOI, teaser).</p></div>
+    <div class="infocard"><h4>Reference libraries</h4><span class="fn">Industry_Taxonomy.md &middot; Industry_Multiples.md</span><p>17-category taxonomy keeps every deal comparable; multiples file (auto-refreshed) benchmarks pricing. Cached industry + market briefs are reused across deals.</p></div>
+  </div>
+
+  <span class="section-label">Reliability</span>
+  <h3 class="sub" style="margin-top:6px">Weekly review &amp; self-audit</h3>
+  <p>Two meta-tasks keep the engine honest. <code>deal-flow-weekly-review</code> (Sunday 7pm) produces the weekly quantitative + qualitative analysis &mdash; theses, missed opportunities, broker activity, multiple insights &mdash; refreshes the dashboard, and emails a summary. <code>agent-audit-review</code> (Tue/Fri 2am) audits the other tasks' runs for errors, retry loops, and token issues, then emails an improvement report. A running <code>Journal.md</code> logs every change, fix, and notable run.</p>
+</section>
+
+<!-- ============================ PROCESS DIAGRAM ============================ -->
+<section id="diagram" class="tabpane">
+  <span class="section-label">The whole thing on one page</span>
+  <h2 class="sec">End-to-end process map</h2>
+  <div class="section-rule"></div>
+  <div class="intro-block">
+    <p>The full journey of a deal &mdash; from the moment it's sourced to a signed close &mdash; laid out as a single flow. Two <b>sourcing engines</b> run in parallel at the top; both drop into one <b>shared analysis &amp; offer pipeline</b> the instant a CIM or financials arrive. Dashed indigo blocks are <b>planned, not yet built</b>.</p>
+  </div>
+
+  <div class="diagram-legend">
+    <span><span class="lg-swatch lg-auto"></span> <b>Automated</b> (scheduled / background)</span>
+    <span><span class="lg-swatch lg-manual"></span> <b>Manual</b> (Thomas + Claude)</span>
+    <span><span class="lg-swatch lg-tbd"></span> <b>TBD</b> (planned)</span>
+  </div>
+
+  <div class="dmap">
+
+    <!-- SOURCING BAND -->
+    <div class="dband sourcing">
+      <div class="dband-lbl">Sourcing &middot; two origination engines</div>
+      <div class="lanes">
+
+        <!-- Brokered lane -->
+        <div class="lane">
+          <div class="lane-h">Brokered &mdash; deals that come to us</div>
+          <div class="lane-tag" style="color:var(--fo-copper-hover)">Inbound &middot; mostly automated</div>
+          <div class="dchain">
+            <div class="dnode"><div class="dn-t">1 &middot; Scrape BizBuySell</div><div class="dn-c">Multi-actor failover: <code>crawlerbros</code> &rarr; <code>fatihtahta</code> &rarr; <code>good_cheap</code>. Dedupe by <code>productId</code>.</div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode"><div class="dn-t">2 &middot; Digest &amp; log to tracker</div><div class="dn-c">Enrich, classify, email digest + hosted form; write to <code>Deal_Flow_Tracker.xlsx</code>.</div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode"><div class="dn-t">3 &middot; Request NDA / contact broker</div><div class="dn-c">On Thomas's reply, submit BBS contact forms; status &rarr; Contacted / NDA.</div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode"><div class="dn-t">4 &middot; CIM received &amp; filed</div><div class="dn-c">Inbox scan detects the CIM, files to <code>CIMs/</code>, status &rarr; CIM / Review.</div></div>
+          </div>
+          <div class="dmini">Inbound broker emails &amp; teasers also enter here as <code>INB-xxx</code> via the daily inbox scan.</div>
+        </div>
+
+        <!-- Proprietary lane -->
+        <div class="lane">
+          <div class="lane-h">Proprietary &mdash; deals we go find</div>
+          <div class="lane-tag" style="color:var(--fo-copper-hover)">Outbound &middot; mostly manual</div>
+          <div class="dchain">
+            <div class="dnode manual"><div class="dn-t">1 &middot; Set thesis + configs</div><div class="dn-c">Industry &times; geography; author <code>{industry}.yaml</code> + <code>geo/{state}.yaml</code>.</div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode manual"><div class="dn-t">2 &middot; Discovery</div><div class="dn-c">SAM, USAspending, Google Maps, BBB (+ regulator pulls). Cast the net.</div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode manual"><div class="dn-t">3 &middot; Enrich &mdash; find the owner</div><div class="dn-c">SOS officers, TDLR, website + social scrapes. Validated owner names.</div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode manual"><div class="dn-t">4 &middot; Verify emails &amp; tier</div><div class="dn-c">Hunter SMTP verify; score &amp; tier &rarr; <code>leads_{industry}_{geo}_v{N}.csv</code>.</div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode tbd"><div class="dn-t">5 &middot; Outreach &mdash; campaign + calls</div><div class="dn-c">Push list to an <b>Instantly</b> campaign; add phone / other outreach. <b>Planned.</b></div></div>
+            <div class="darrow">&darr;</div>
+            <div class="dnode"><div class="dn-t">6 &middot; Responder &rarr; live deal</div><div class="dn-c">Owner reply logged as <code>INB-xxx</code> by the daily inbox scan.</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="converge"><span class="big">&darr;</span>Both channels converge the moment a CIM or financials arrive</div>
+
+    <!-- SHARED BAND -->
+    <div class="dband shared">
+      <div class="dband-lbl">Shared analysis &amp; offer pipeline</div>
+      <div class="spine">
+        <div class="dchain">
+          <div class="dnode"><div class="dn-t">1 &middot; CIM review &mdash; extract &amp; normalize</div><div class="dn-c">Automated: <code>cim-deal-review</code> parses the CIM, normalizes the P&amp;L.</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode"><div class="dn-t">2 &middot; BST &mdash; score business quality</div><div class="dn-c">Weighted 6-category score /10 (quick-lbo skill).</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode"><div class="dn-t">3 &middot; LBO &mdash; model the economics</div><div class="dn-c">Debt sizing, DSCR, IRR/MOIC, FCF; price from the CIM ask.</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode manual"><div class="dn-t">4 &middot; Decision gate</div><div class="dn-c">Recommendation emailed; Thomas replies <b>"proceed"</b> or pass.</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode"><div class="dn-t">5 &middot; Market research (3-layer)</div><div class="dn-c">Industry + geography + deal-specific briefs; attractiveness score.</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode"><div class="dn-t">6 &middot; Broker / seller call prep</div><div class="dn-c">Auto-drafted talking points into the deal's <code>Meetings/</code>.</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode"><div class="dn-t">7 &middot; Capture the call &mdash; note <span class="badge b-auto" style="font-size:.55rem">New</span></div><div class="dn-c">Record &rarr; local GPU transcription &rarr; Claude "Deal Call" note.</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode"><div class="dn-t">8 &middot; IOI &mdash; make the offer</div><div class="dn-c">Personalized 3-slide Indication of Interest (ioi skill).</div></div>
+          <div class="darrow">&darr;</div>
+          <div class="dnode manual"><div class="dn-t">9 &middot; LOI &rarr; diligence &rarr; close</div><div class="dn-c">Forward-only status ladder; each transition logged.</div></div>
+        </div>
+      </div>
+      <div class="sidecar"><b>Meeting-capture sub-loop (step 7):</b> phone / desktop audio &rarr; <code>Capture Inbox/</code> &rarr; WhisperX (GPU) + pyannote diarization &rarr; Claude note &rarr; <code>Call_Notes/</code>. <b>TBD:</b> auto-file deal calls into <code>Deal_Reviews/{id}/Meetings/</code> + tracker write-back.</div>
+    </div>
+
+  </div>
+
+  <div class="callout" style="margin-top:22px"><b>One tracker, one set of deal folders.</b> Whichever engine sources a deal, it lands on the same <code>Deal_Flow_Tracker.xlsx</code> and flows through the same <code>Deal_Reviews/{id} - {name}/</code> workspace. A proprietary deal is just a brokered deal we sourced ourselves.</div>
+</section>
+
+<!-- ============================ TOOLS & SCRIPTS ============================ -->
+<section id="stack" class="tabpane">
+  <span class="section-label">Everything under the hood</span>
+  <h2 class="sec">Tools, scripts &amp; stack</h2>
+  <div class="section-rule"></div>
+  <div class="intro-block">
+    <p>A complete inventory of what the deal-flow engine runs on &mdash; scripts, Claude skills, scheduled tasks, the self-hosted meeting-capture stack, MCP connections, external APIs, and the data files that tie it all together. <span style="color:#4F46E5;font-weight:700">Indigo = TBD / planned.</span></p>
+  </div>
+
+  <h3 class="sub">Core automation scripts <span style="font-weight:400;color:var(--fo-gray-medium)">&mdash; workspace root</span></h3>
+  <table>
+    <thead><tr><th>Script</th><th>What it does</th><th>Used by</th></tr></thead>
+    <tbody>
+      <tr><td><code>scrape_bizbuysell.py</code></td><td>Multi-actor BizBuySell scraper with tiered failover (direct Apify API), auto-widen, dedupe by <code>productId</code>, loud-stop</td><td>bizbuysell-daily-digest</td></tr>
+      <tr><td><code>generate_digest_form.py</code></td><td>Builds the emailed digest + hosted selection form; pushes <code>bbs_digest_form.html</code> to GitHub Pages via git</td><td>bizbuysell-daily-digest</td></tr>
+      <tr><td><code>refresh_dashboard.py</code></td><td>Rebuilds <code>Deal_Flow_Dashboard.html</code> from the tracker (data, funnel, multiples, CIM scorecards)</td><td>Most tasks</td></tr>
+      <tr><td><code>backup_tracker.py</code></td><td>Timestamped tracker backup before any write (<code>Archive/tracker_backups/</code>)</td><td>Any task that writes</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Proprietary search pipeline <span style="font-weight:400;color:var(--fo-gray-medium)">&mdash; <code>build-prospect-list</code> skill, <code>Proprietary/scripts/</code></span></h3>
+  <table>
+    <thead><tr><th>Stage</th><th>Scripts</th></tr></thead>
+    <tbody>
+      <tr><td>Discovery</td><td><code>pull_sam.py</code> &middot; <code>pull_usaspending.py</code> &middot; <code>pull_apify_gmaps.py</code> &middot; <code>pull_bbb.py</code> &middot; <code>pull_epa_rcra.py</code> &middot; <code>pull_tceq_nor.py</code></td></tr>
+      <tr><td>Merge / filter</td><td><code>merge_raw.py</code> &middot; <code>dedupe_vs_existing.py</code> &middot; <code>step0_filter_false_positives.py</code></td></tr>
+      <tr><td>Enrichment (owner)</td><td><code>step1_sos_lookup.py</code> &middot; <code>step2_tdlr_crossref.py</code> &middot; <code>enrich_layer1_website.py</code> &middot; <code>step5_instagram.py</code> &middot; <code>enrich_layer_google_search.py</code></td></tr>
+      <tr><td>Email discovery / verify</td><td><code>step_email_patterns.py</code> &middot; <code>enrich_layer6_hunter.py</code> &middot; <code>verify_emails_hunter.py</code></td></tr>
+      <tr><td>Score / finalize</td><td><code>step8_merge_and_finalize_v2.py</code> &middot; <code>step9_flag_lead_warnings.py</code> &middot; <code>web/lead_browser.html</code></td></tr>
+      <tr><td>Config</td><td><code>configs/{industry}.yaml</code> &middot; <code>configs/geo/{state}.yaml</code> (live: tree_services, hvac, print_finishing, voip_ucaas, hazmat)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Claude skills</h3>
+  <table>
+    <thead><tr><th>Skill</th><th>Purpose</th><th>Key assets</th></tr></thead>
+    <tbody>
+      <tr><td><code>quick-lbo</code></td><td>CIM parse &rarr; BST + LBO model</td><td><code>populate_bst.py</code>, <code>populate_lbo.py</code>, <code>bst_template.xlsx</code>, <code>lbo_template.xlsx</code></td></tr>
+      <tr><td><code>market-research</code></td><td>3-layer market/industry/geo research</td><td><code>census_api.py</code>, WebSearch, Apollo</td></tr>
+      <tr><td><code>ioi</code></td><td>Personalized Indication of Interest</td><td>IOI <code>.pptx</code> template, pptx pack/repair</td></tr>
+      <tr><td><code>build-prospect-list</code></td><td>Proprietary discovery &rarr; enrichment &rarr; tiered lead list</td><td>The <code>Proprietary/scripts/</code> pipeline above</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Scheduled cloud tasks</h3>
+  <table>
+    <thead><tr><th>Task</th><th>Cadence</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>bizbuysell-daily-digest</code></td><td>Mon/Wed/Fri 5pm</td><td>Scrape + digest + tracker</td></tr>
+      <tr><td><code>daily-inbox-review</code></td><td>Daily 7am</td><td>Inbox scan, statuses, CIM detect</td></tr>
+      <tr><td><code>nda-reply-processor</code></td><td>Daily 10am &amp; 10pm</td><td>NDA replies, broker forms, auto-pass</td></tr>
+      <tr><td><code>cim-deal-review</code></td><td>Daily 8am/1pm/6pm</td><td>BST + LBO on one CIM</td></tr>
+      <tr><td><code>broker-call-prep-generator</code></td><td>Daily 8:45/1:45/6:45</td><td>Draft call-prep docs</td></tr>
+      <tr><td><code>market-research-processor</code></td><td>Daily 10am</td><td>Run research on "proceed"</td></tr>
+      <tr><td><code>deal-flow-weekly-review</code></td><td>Sunday 7pm</td><td>Weekly quant + qual review</td></tr>
+      <tr><td><code>agent-audit-review</code></td><td>Tue/Fri 2am</td><td>Audit other task runs</td></tr>
+      <tr><td><code>tx-reinstatement-check</code></td><td>Mon/Thu 9am</td><td>Track TX entity status</td></tr>
+      <tr><td><code>formspree-leads-weekly-sweep</code></td><td>Monday 7am</td><td>Sweep landing-page leads</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Meeting-capture stack <span style="font-weight:400;color:var(--fo-gray-medium)">&mdash; self-hosted, local (<code>Deal_Call_Capture/</code>)</span></h3>
+  <table>
+    <thead><tr><th>Component</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>Speakr <span class="mono">learnedmachine/speakr</span></td><td>Self-hosted recorder + notes web app; calls Claude for the summary</td></tr>
+      <tr><td>WhisperX ASR <span class="mono">learnedmachine/whisperx-asr-service</span></td><td>Local GPU transcription (<code>large-v3</code>) + pyannote speaker diarization</td></tr>
+      <tr><td><code>docker-compose.yml</code></td><td>The two services, pinned by image digest, bound to <code>127.0.0.1</code></td></tr>
+      <tr><td><code>gdrive_inbox_bridge.ps1</code></td><td>Watches <code>Capture Inbox/{Project}/</code>, stamps the project, feeds Speakr</td></tr>
+      <tr><td><code>export_notes.ps1</code></td><td>Polls Speakr, routes + writes <code>summary.md</code> / <code>transcript.md</code> / <code>metadata.json</code>, classifies call type</td></tr>
+      <tr><td><code>deal_call_template.md</code></td><td>The "Deal Call" summary prompt (versioned copy of the Speakr prompt)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">MCP servers &amp; integrations</h3>
+  <table>
+    <thead><tr><th>Connection</th><th>Use</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Gmail MCP</td><td>Inbox scan, drafts, send, thread reads</td><td>Live</td></tr>
+      <tr><td>Apify (direct API)</td><td>BizBuySell scraper actors (MCP bypassed after a Pydantic bug)</td><td>Live</td></tr>
+      <tr><td>Claude-in-Chrome</td><td>Submit BizBuySell broker contact forms</td><td>Live</td></tr>
+      <tr><td>Apollo MCP</td><td>Competitor / contact enrichment (optional)</td><td>Optional</td></tr>
+      <tr><td style="color:#4F46E5"><b>Instantly MCP</b></td><td style="color:#4F46E5">Push proprietary thesis list &rarr; email campaign (step&nbsp;P8)</td><td><span class="badge b-tbd">TBD</span></td></tr>
+      <tr><td style="color:#4F46E5"><b>Phone / other outreach</b></td><td style="color:#4F46E5">Owner calls + additional channels on the tiered list</td><td><span class="badge b-tbd">TBD</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">External APIs &amp; services</h3>
+  <table>
+    <thead><tr><th>Service</th><th>Role</th><th>Cost note</th></tr></thead>
+    <tbody>
+      <tr><td>Apify</td><td>BizBuySell / Google Maps scraper actors</td><td>Pay-per-result (~$0.003/listing)</td></tr>
+      <tr><td>Hunter</td><td>Email finder + SMTP verification</td><td>Starter $49/mo (2,000 credits)</td></tr>
+      <tr><td>Census API</td><td>Market-research demographics (NAICS)</td><td>Free</td></tr>
+      <tr><td>Anthropic API</td><td>Meeting-note generation + call-type classification (pay-per-token, <b>separate</b> from the Claude subscription)</td><td>Metered</td></tr>
+      <tr><td>HuggingFace</td><td>Gated pyannote diarization models</td><td>Free token</td></tr>
+      <tr><td>GitHub Pages</td><td>Hosts the digest selection form + this process doc</td><td>Free</td></tr>
+      <tr><td>Formspree</td><td>Landing-page lead capture</td><td>Free tier</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Data, reference &amp; infrastructure</h3>
+  <div class="grid2">
+    <div class="infocard"><h4>Source-of-truth data</h4><span class="fn">Deal_Flow_Tracker.xlsx &middot; Deal_Flow_Dashboard.html</span><p>The master deal sheet + its rebuilt HTML dashboard. Every deal, both channels, one schema.</p></div>
+    <div class="infocard"><h4>Reference libraries</h4><span class="fn">Industry_Taxonomy.md &middot; Industry_Multiples.md &middot; Industry_Benchmarks.*</span><p>17-category taxonomy, asking multiples, and benchmark ratios that keep scoring comparable.</p></div>
+    <div class="infocard"><h4>Ops &amp; knowledge</h4><span class="fn">Journal.md &middot; Scraper_Actor_Options.md &middot; Prompts/</span><p>Running change log, the scraper failover reference, and the versioned cloud-task prompts.</p></div>
+    <div class="infocard"><h4>Local runtime</h4><span class="fn">Docker + WSL2 + NVIDIA GPU &middot; Google Drive sync</span><p>GPU box (8&nbsp;GB, int8) runs transcription; Drive syncs the workspace + the capture inbox. Runtime data under <code>C:\Call_Capture\</code>.</p></div>
+  </div>
+</section>
+
+</main>
+
+<div class="footer">
+  Founders' Oak &middot; Deal Flow Operating System &middot; Process review &mdash; updated 2026-07-05<br>
+  Two origination engines &rarr; one shared analysis pipeline. Brokered volume, proprietary control.
+</div>
+
+<script>
+  document.querySelectorAll('.tabbtn').forEach(function(btn){
+    btn.addEventListener('click',function(){ activate(btn.dataset.tab); });
+  });
+  document.querySelectorAll('[data-goto]').forEach(function(link){
+    link.addEventListener('click',function(e){ e.preventDefault(); activate(link.dataset.goto);
+      window.scrollTo({top:0,behavior:'smooth'}); });
+  });
+  function activate(id){
+    document.querySelectorAll('.tabbtn').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===id); });
+    document.querySelectorAll('.tabpane').forEach(function(p){ p.classList.toggle('active', p.id===id); });
+  }
+</script>
+</body>
+</html>
